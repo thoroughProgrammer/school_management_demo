@@ -1,0 +1,79 @@
+{% extends 'admin_templates/base_template.html' %}
+
+{% block page_title %}
+    Edit Student | {{ student.school_id }} | {{ student.first_name }} {{ student.last_name}}
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid">
+
+            <a class="btn btn-secondary" href="{% url 'manage_student' user_school_id %}" role="button"> &larr; Back</a> <br/>&nbsp;
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Edit Student</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                        {% comment %} Displaying the Django Form using forms.py EditStudentForm {% endcomment %}
+                        {% url 'edit_student_save' user_school_id as action_path %}
+                        {% include 'admin_templates/form_template.html' with messages=messages form=form action_path=action_path button_text="Update Student" %}
+
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+      </section>
+
+  {% endblock main_content %}
+
+  {% block custom_js %}
+
+    <script>
+        $('form').submit(function(e) {
+
+        phoneNumEle = document.getElementById('id_phone_number')
+
+        const validatePhoneNum = (phoneNum) => {
+            if (phoneNum.length > 0 && !phoneNum.match(/^\d{11}$/)) {
+                $("<span id='phone_number_error' style='color: red; padding: 5px; font-weight: bold;'> Phone number is not valid </span>").insertAfter("#id_phone_number")
+                setInterval(() => {
+                    document.getElementById('phone_number_error').remove()
+                }, 3000)   
+
+                e.preventDefault()
+            }
+        } 
+
+        const checkImgSize = () => {
+            const imageEle = document.getElementById('id_profile_pic')
+            const maxSize = 1024 * 2 
+            const imageSize = imageEle.files[0].size / 1024
+            if (imageSize > maxSize) {
+                $("<span id='profile_pic_error' style='color: red; padding: 5px; font-weight: bold;'> File size should not exceed 2MB </span>").insertAfter("#id_profile_pic")
+                setInterval(() => {
+                    document.getElementById('profile_pic_error').remove()
+                }, 3000)  
+
+            }
+        }
+            
+        validatePhoneNum(phoneNumEle.value) 
+        checkImgSize() 
+
+        });
+
+    </script>
+    
+{% endblock custom_js %}

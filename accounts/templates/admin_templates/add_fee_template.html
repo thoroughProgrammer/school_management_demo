@@ -1,0 +1,33 @@
+{% extends 'admin_templates/base_template.html' %}
+{% block page_title %}
+Add Fee
+{% endblock page_title %}
+{% block main_content %}
+{% load static %}
+
+<section class="content">
+  <div class="container-fluid">
+
+      <a id="back_button" class="btn btn-secondary" href="" role="button"> &larr; Back</a> <br/>&nbsp;
+
+      <div class="row">
+          <div class="col-md-12">
+              <!-- general form elements -->
+              <div class="card card-primary">
+              <div class="card-header">
+                  <h3 class="card-title">Add Student</h3>
+              </div>
+              <!-- /.card-header -->
+              <!-- form start -->
+              {% url 'add_fee_save' user_school_id as action_path %}
+              {% include 'admin_templates/form_template.html' with messages=messages form=form action_path=action_path button_text="Add Fee" %}
+            </div>
+            <!-- /.card -->
+
+        </div>
+    </div>
+
+</div><!-- /.container-fluid -->
+</section>
+
+{% endblock main_content %}

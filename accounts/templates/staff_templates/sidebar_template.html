@@ -1,0 +1,61 @@
+{% load static %}
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <!-- Brand Logo -->
+      <a href="{% url 'staff_home' user_school_id %}" class="brand-link">
+        <img src="{% static 'dist/img/AdminLTELogo.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+            style="opacity: .8">
+        <span class="brand-text font-weight-light">Green Leaf</span>
+      </a>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+          <div class="image">
+            {% if user.profile_pic %}
+            <img src="{{ user.profile_pic.url }}" class="img-circle elevation-2" alt="User Image">
+            {% else %}
+            <img src="{% static "assets/images/user.jpg" %}" class="img-circle elevation-2" alt="User Image">
+            {% endif %}
+          </div>
+          <div class="info">
+            <a href="{% url 'staff_profile' user_school_id %}" class="d-block">{{ user_first_name }} {{ user_last_name }}</a>
+          </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <!-- Add icons to the links using the .nav-icon class
+                with font-awesome or any other icon font library -->
+            
+            <li class="nav-item">
+              {% url 'staff_home' user_school_id as staff_home %}
+              <a href="{{ staff_home }}" class="nav-link {% if request.path == staff_home %} active {% endif %}">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                  Home
+                  {% comment %} <span class="right badge badge-danger">New</span> {% endcomment %}
+                </p>
+              </a>
+            </li>
+
+
+            <li class="nav-item">
+              {% url 'staff_subjects' user_school_id as staff_subjects %} 
+              {% url 'staff_add_result' user_school_id subject.id as staff_add_result %} 
+              <a href="{{ staff_subjects }}" class="nav-link {% if staff_subjects in request.path %} active {% endif %} {% if request.path == staff_add_result %} active {% endif %}">
+                <i class="nav-icon fas fa-book"></i>
+                <p>
+                  Subjects
+                </p>
+              </a>
+            </li>
+              
+          </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+      </div>
+      <!-- /.sidebar -->
+    </aside>

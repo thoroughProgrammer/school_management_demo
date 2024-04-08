@@ -1,0 +1,410 @@
+{% extends 'staff_templates/base_template.html' %}
+ {% load custom_filters_tags %} 
+ {% block page_title %} Add Result | {{ user_school_id }} 
+ {% endblock page_title %} 
+ {% block main_content %} 
+ {% load static %}
+
+<section class="content">
+  <div class="container-fluid" id="messages">
+    {% if messages %}
+    <div class="form-group">
+      <div class="col-12">
+        {% for message in messages %} {% if message.tags == "error" %}
+        <div
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+          style="margin-top: 10px"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="close"
+            data-dismiss="alert"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        {% elif message.tags == "success" %}
+        <div
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+          style="margin-top: 10px"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="close"
+            data-dismiss="alert"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+      <div class="col-md-12">
+
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <label class="input-group-text" for="assessment_type"
+              >Select Session</label
+            >
+          </div>
+          <select
+            class="custom-select"
+            name="session"
+            id="session"
+          >
+            {% for session in sessions %}
+            <option  value="{{ session.id }}">
+              {{ session }}
+            </option>
+            {% endfor %}
+          </select>
+
+          <div class="input-group-prepend ml-3">
+            <label class="input-group-text" for="assessment_type"
+            >Select Term</label
+          >            
+          </div>
+          <select
+            class="custom-select"
+            name="term"
+            id="term"
+          >
+            {% for term in current_session.term_set.all %}
+            <option value="{{ term.id }}" >
+              {{ term }}
+            </option>
+            {% endfor %}
+          </select>
+          <br />&nbsp;
+        </div>
+      </div>
+    </div>
+
+        <!-- general form elements -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-tools w-100">
+              <div class="d-flex justify-content-between w-100">
+                <div>
+                        <a class="btn btn-primary" href="{% url 'staff_subjects' user_school_id %}" role="button">Back to Subjects</a> <br/>&nbsp;
+                </div>
+                <div>
+                <div class="input-group input-group-sm" style="width: 150px">
+                  <form action="" method="post">
+                    {% csrf_token %}
+  
+                    <div class="input-group-append">
+                      <input
+                        type="search"
+                        aria-label="Search"
+                        name="searched"
+                        class="form-control float-right"
+                      />
+  
+                      <button type="submit" class="btn btn-default">
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                </div>
+            </div>
+
+              
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap" name="table">
+                <thead>
+                  <tr id="thead-row1">
+                   
+                  </tr>
+                  <tr id="thead-row2">
+                    
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                </tbody>
+              </table>
+              <div id="spinner_div" class="text-center">
+                <div class="spinner-grow text-primary" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-secondary" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-success" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-danger" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-warning" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-info" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-light" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-dark" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+              </div>
+            <div id="results"></div>
+            <!-- errors go here -->
+            
+          </div>
+          <!-- /.card-body -->
+
+        </div>
+        <!-- /.card -->
+        <button type="button" id="save_btn" class="btn btn-success mb-3">Save</button>
+
+      </div>
+    </div>
+
+    <div id="preDeleteModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div id="preDeleteModalContent" class="mb-3 mt-1 text-center">
+          </div>
+          <div class="d-flex justify-content-center mb-3">
+            <button type="button" id="cancelBtn"id="" class="btn btn-secondary btn-sm btn-success mr-3">cancel</button>
+            <button type="button" id="deleteBtn" class="btn btn-secondary btn-sm btn-danger">delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /.container-fluid -->
+</section>
+
+{% endblock main_content %} 
+
+{% block custom_js %}
+
+  <script>
+    let finalAssessmentStore = {}
+
+    const tbodyEl = document.getElementsByTagName('tbody')[0]
+    const trEls = tbodyEl.getElementsByTagName('tr')
+    
+    for (let row=0; row<Object.keys(trEls).length; row++) {
+        const scores = trEls[row].getElementsByClassName('score')
+        let final_score = 0
+        for (let scoreIndex=0; scoreIndex<Object.keys(scores).length; scoreIndex++) {
+            final_score += Number(scores[scoreIndex].innerHTML)
+        }
+        const finalScoreEl = trEls[row].getElementsByClassName('final_score')
+        finalScoreEl[0].innerHTML = final_score
+    }
+
+    // on page load get assessments via ajax
+    const currentSessionId = {{current_session.id}}
+    const currentTermId = {{current_term.id}}
+    get_final_assessment("", currentSessionId, currentTermId)
+
+    // on change of session
+    // send ajax request for term data
+    // and assessments for that session
+    $('#session').on('change', (e) => {
+      let selected_session = e.target.value
+      get_final_assessment(selected_session)
+      const table = $('table')[0]
+      table.style.display = 'none'
+    })
+
+    $('#term').on('change', (e) => {
+      createStudentAssementEntries()
+    })
+
+    function get_final_assessment(sessionId, currentSessionId=false, currentTermId=false) {
+      const spinner = document.getElementById('spinner_div')
+      spinner.style.display = 'block';
+      $.get("{% url 'get_final_assessment' user_school_id %}", {sessionId, subjectId: {{ subject.id }} })
+      .done((res) => {
+        const table = $('table')[0]
+        table.style.display = 'block' 
+        finalAssessmentStore = res
+        updateTerms(res.terms, currentSessionId, currentTermId)
+        createStudentAssementEntries()
+        const spinner = document.getElementById('spinner_div')
+        spinner.style.display = 'none';
+      })
+      .fail((res) => {
+        console.log("Failed bro")
+      })
+    } 
+
+    function updateTerms(termsObj, currentSessionId, currentTermId) {
+      const termSelectEl = $('#term').empty()
+      for (const termKey in Object.keys(termsObj)) {
+        const term = termsObj[termKey]
+        const optionx = `
+                <option value="${term.id}">
+                  Term ${term.term}
+                </option>
+        `
+        const option = $(optionx)
+        termSelectEl[0].append(option[0])
+        if (currentSessionId && currentTermId) {
+          $("#session").children(`[value="${currentSessionId}"]`).attr('selected', true)
+          $("#term").children(`[value="${currentTermId}"]`).attr('selected', true)
+        }
+      }
+    }
+
+    function createStudentAssementEntries() {
+      const term = $('#term').val()
+      theadGenerator(finalAssessmentStore.assessment_type_and_descs[term])
+      try {
+        $('tbody').empty()
+        for (const student of finalAssessmentStore.students) {
+          tbodyGenerator(student, term)
+        }
+      } catch (err) {
+          console.log(err)
+        }
+    }
+
+    const theadGenerator = (assessment_desc) => {
+      $('#thead-row1').empty()
+      $('#thead-row2').empty()
+      
+      let thx1 = `<th>Student ID</th>`
+      $('#thead-row1')[0].append($(thx1)[0])
+      thx1 = `<th>Name</th>`
+      $('#thead-row1')[0].append($(thx1)[0])
+
+      let thx2 = `<th><th/>`
+      $('#thead-row2')[0].append($(thx2)[0])
+      $('#thead-row2')[0].append($(thx2)[0])
+
+
+      for (let key of Object.keys(assessment_desc)) {
+        thx1 = `<th class="text-center" colspan=${assessment_desc[key].length}>
+                    <span style="text-transform: capitalize">
+                      ${key}
+                    </span>
+                  </th>
+                  `
+        $('#thead-row1')[0].append($(thx1)[0])
+        for (let assessment of assessment_desc[key]) {
+          thx2 = `<th class="text-center" data-assessment-title="${assessment}">${assessment}</th>`
+          $('#thead-row2')[0].append($(thx2)[0])
+        }
+      }
+
+      thx1 = `
+                <th>
+                  Total Score
+                </th>
+              `
+      $('#thead-row1')[0].append($(thx1)[0])
+      thx2 = `<th></th>`
+      $('#thead-row2')[0].append($(thx2)[0])
+    }
+
+    // generate table body
+    function tbodyGenerator(student, term) {
+      let score = 0
+      const trx = `<tr>
+                      <td>${student.school_id}</td>
+                      <td>${student.last_name + ' ' + student.first_name }</td>
+                      
+                    </tr>`
+      const tr = $(trx)
+      let a = $('#thead-row2')[0].children
+      for (let _ in Object.keys(a)) {
+        student.assessments[term].forEach(obj => {
+          if (a[_].dataset.assessmentTitle === obj.assessment_desc) {
+            score += obj.score
+            const tdx = `<td class="text-center">
+                    <span class="score" data-assessment-title="${obj.assessment_desc}" data-assessment-id="${obj.id}">
+                        ${obj.score}
+                    </span>
+                  </td>`
+            tr.append(tdx)
+          }
+        })
+      }
+      const tdx = `<td class="final_score text-center">${score}</td>`
+      tr.append(tdx)
+      $('tbody')[0].append(tr[0])
+    }
+
+    // csrf token setup
+    $(function () {
+      // This function gets cookie with a given name
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie != "") {
+          let cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            let cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == name + "=") {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      let csrftoken = getCookie("csrftoken");
+
+      /*
+      The functions below will create a header with csrftoken
+      */
+
+      function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
+      }
+      function sameOrigin(url) {
+        // test that a given url is a same-origin URL
+        // url could be relative or scheme relative or absolute
+        let host = document.location.host; // host + port
+        let protocol = document.location.protocol;
+        let sr_origin = "//" + host;
+        let origin = protocol + sr_origin;
+        // Allow absolute or scheme relative URLs to same origin
+        return (
+          url == origin ||
+          url.slice(0, origin.length + 1) == origin + "/" ||
+          url == sr_origin ||
+          url.slice(0, sr_origin.length + 1) == sr_origin + "/" ||
+          // or any other URL that isn't scheme relative or absolute i.e relative.
+          !/^(\/\/|http:|https:).*/.test(url)
+        );
+      }
+
+      $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+            // Send the token to same-origin, relative URLs only.
+            // Send the token only if the method warrants CSRF protection
+            // Using the CSRFToken value acquired earlier
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+        },
+      });
+    });
+  </script>
+
+{% endblock %}

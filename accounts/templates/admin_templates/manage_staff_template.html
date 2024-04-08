@@ -1,0 +1,168 @@
+{% extends 'admin_templates/base_template.html' %}
+
+{% block page_title %}
+    Manage Staff
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid">
+
+            <a class="btn btn-primary" href="{% url 'add_staff' user_school_id %}" role="button">+ Add Staff</a> <br/>&nbsp;
+
+            {% if messages %}
+                                <div class="form-group">
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == "error" %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% elif message.tags == "success" %}
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                </div>
+                                {% endif %}
+                                
+
+            <div class="row">
+
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Staff Details</h3>
+
+                            <div class="card-tools">
+                                <div class="input-group input-group-sm" style="width: 150px;">
+                                  <form action="" method="post">
+                                    {% csrf_token %}
+                                  <input type="search" id="myInput" onkeyup="searchFunction()" aria-label="Search" name="searched" class="form-control float-right" placeholder="Search Staff by First Name">
+              
+                                  <!-- <div class="input-group-append">
+                                    <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                  </div> -->
+                                  </form>
+                                </div>
+                              </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover text-nowrap" id="myTable">
+                            <thead>
+                                <tr>
+                                <th>School ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Other Names</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                                <th>Gender</th>
+                                <th>Date Joined</th>
+                                <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="myUL">
+                                {% for staff in staff_list %}
+                                <tr>
+                                <td>{{ staff.user.school_id }}</td>
+                                <td>{{ staff.user.first_name }}</td>
+                                <td>{{ staff.user.last_name }}</td>
+                                <td>{{ staff.user.other_names }}</td>
+                                <td>{{ staff.user.email }}</td>
+                                <td>{{ staff.user.phone_number }}</td>
+                                <td>{{ staff.user.get_gender_display }}</td>
+                                <td>{{ staff.user.date_joined }}</td>
+                                <td>
+                                    <a href="{% url 'edit_staff' user_school_id staff.user.school_id %}" class="btn btn-success">Edit</a> 
+                                    <a href="#" data-href="{% url 'delete_staff' user_school_id staff.user.school_id %}" class="btn btn-danger preDeleteBtn" data-toggle="modal" data-target=".bd-example-modal-sm">Delete</a>
+                                </td>
+                                </tr>
+                                {% endfor %}
+                                
+                            </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                        </div>
+                    <!-- /.card -->
+
+
+                    <div id="preDeleteModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-sm">
+                          <div class="modal-content">
+                            <div id="preDeleteModalContent" class="mb-3 mt-1 text-center">
+                            </div>
+                            <div class="d-flex justify-content-center mb-3">
+                              <button type="button" id="cancelBtn"id="" class="btn btn-secondary btn-sm btn-success mr-3" data-dismiss="modal">cancel</button>
+                              <a type="button" id="deleteBtn" class="btn btn-sm btn-danger">delete</a>
+                            </div>
+                        </div>    
+                    </div>
+
+                </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+      </section>
+
+  {% endblock main_content %}
+
+{% block custom_js %}
+
+<script>
+
+$(document).on('click', '.preDeleteBtn', e => {
+    const href = e.target.dataset.href
+    //   set modal message
+    const modalMsgEl = document.getElementById('preDeleteModalContent')
+    modalMsgEl.innerText = `Are you sure you want to delete?`
+    // set href attribute of delete button
+    const deleteBtnEl = document.getElementById('deleteBtn')
+    deleteBtnEl.setAttribute('href', href)
+
+} )
+
+$(document).on('click', '#deleteBtn', e => {
+    $("#preDeleteModal").modal('hide')
+})
+
+function searchFunction() {
+  // Declare variables
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("myTable");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td1 = tr[i].getElementsByTagName("td")[0];
+    td2 = tr[i].getElementsByTagName("td")[1];
+    if (td1||td2) {
+      txtValue1 = td1.textContent || td1.innerText;
+      txtValue2 = td2.textContent || td2.innerText;
+      if ((txtValue1.toUpperCase().indexOf(filter) > -1) || (txtValue2.toUpperCase().indexOf(filter) > -1)) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+</script>
+
+{% endblock custom_js %}

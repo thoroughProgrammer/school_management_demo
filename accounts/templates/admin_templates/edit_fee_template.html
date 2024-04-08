@@ -1,0 +1,61 @@
+{% extends 'admin_templates/base_template.html' %}
+{% block page_title %}
+Edit Fee | Fee ID : {{ fee.custom_id }}
+{% endblock page_title %}
+{% block main_content %}
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <a class="btn btn-secondary" href="{% url 'manage_fee' user_school_id %}" role="button"> &larr; Back</a> <br/>&nbsp;
+          <div class="row">
+              <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Edit Fee</h3>
+              </div>    
+              <!-- /.card-header -->
+              <!-- form start -->
+              <form role="form" action="" method="post">
+                {% csrf_token %}
+              <div class="card-body">
+
+                  {% for field in form %}
+                <div class="form-group">
+                    {{ field.errors }}
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+                  {% endfor %}
+
+                 <div class="form-group">
+                    {% if messages %}
+                      {% for message in messages %}
+                      {% if message.tags == 'error' %}
+                      <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
+                      {% endif %}
+                      {% if message.tags == 'success' %}
+                      <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
+                      {% endif %}
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+
+              </div>
+              <!-- /.card-body -->
+
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-block">Edit Fee</button>
+              </div>
+            </form>
+          </div>
+          <!-- /.card -->
+
+
+
+        </div>
+        </div>
+    </div>
+  </section>
+  <!-- /.content -->
+{% endblock main_content %}

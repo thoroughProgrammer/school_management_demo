@@ -1,0 +1,110 @@
+{% extends 'admin_templates/base_template.html' %}
+
+{% block page_title %}
+    
+Current Session
+       
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid">
+
+            <a id="back_button" class="btn btn-secondary" href="{% url 'manage_session' user_school_id %}" role="button"> &larr; Back</a> <br/>&nbsp;
+
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Select Current Session</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form role="form" method="POST" action="{% url 'select_session_save' user_school_id %}">
+                        {% csrf_token %}
+
+                        
+                                {% comment %} Display Messages {% endcomment %}
+                                {% if messages %}
+                                <div class="form-group">
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == "error" %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% elif message.tags == "success" %}
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                </div>
+                                {% endif %}
+                            
+
+                        <div class="card-body">
+
+                            <div class="form-group">
+                                <label>Select Current Session </label>
+                                <select class="form-control" name="session">
+                                    {% for session in sessions %}
+                                        <option value="{{ session.id }}" {% if session.current_session %} default {%  endif %}>{{ session.session_start }}/{{ session.session_end }} Session</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Select Current Term</label> 
+                                <select class="form-control" name="term">
+                                    {% for term in terms %}
+                                        <option value="{{ term.0 }}">{{ term.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Select Current Session</button>
+                        </div>
+                    </form>
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+      </section>
+
+  {% endblock main_content %}
+
+  {% block custom_js %}
+    {% comment %} Checking if email and username already exists or not usin Ajax {% endcomment %}
+
+    <script>
+        $('form').submit(function(e) {
+            $(':disabled').each(function(e) {
+                $(this).removeAttr('disabled');
+            })
+        });
+
+        // $( "#back_button" ).on( "click", function() {
+        //     window.history.back();
+        // });
+    </script>
+
+  {% endblock custom_js %}

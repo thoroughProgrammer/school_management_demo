@@ -1,0 +1,168 @@
+{% extends 'staff_templates/base_template.html' %}
+
+{% block page_title %}
+    Update Profile
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Update Profile</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form role="form" method="POST" action="{% url 'edit_staff_profile' user_school_id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        
+                                {% comment %} Display Messages {% endcomment %}
+                                {% if messages %}
+                                <div class="form-group">
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == "error" %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% elif message.tags == "success" %}
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                </div>
+                                {% endif %}
+                            
+
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>School ID </label>
+                                <input type="text" class="form-control" name="user_school_id" value="{{ user_school_id }}" disabled="disabled" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label>First Name </label>
+                                <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Last Name </label>
+                                <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Other Names</label>
+                                {% if user.other_names %}
+                                    <input type="text" class="form-control" name="other_names" value="{{ user.other_names }}">
+                                {% else %}
+                                    <input type="text" class="form-control" name="other_names" value="">             
+                                {% endif %}   
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email </label>
+                                <input type="text" class="form-control" name="email" value="{{ user.email }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Password </label>
+                                <input type="text" class="form-control" name="password" placeholder="Fill only if you want to change Password.">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select name="gender" class="form-control">
+                                {% for gender in gender_data %} 
+                                    <option value="{{ gender.0 }}" {% if user.gender == gender.0 %} selected {% endif %}> {{ gender.1 }}</option>
+                                {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                {% if user.phone_number %}
+                                    <input id="id_phone_number" type="text" class="form-control" name="phone_number" value="{{ user.phone_number }}">
+                                {% else %}
+                                    <input id="id_phone_number" type="text" class="form-control" name="phone_number" value="">             
+                                {% endif %}   
+                            </div>
+
+                            <div class="form-group">
+                                <label>Profile Picture </label>
+                                <input type="file" name="profile_pic" id="id_profile_pic">
+                            </div>
+
+                            
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </div>
+                    </form>
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+      </section>
+
+  {% endblock main_content %}
+
+  {% block custom_js %}
+
+    <script>
+        $('form').submit(function(e) {
+
+        phoneNumEle = document.getElementById('id_phone_number')
+
+        const validatePhoneNum = (phoneNum) => {
+            if (phoneNum.length > 0 && !phoneNum.match(/^\d{11}$/)) {
+                $("<span id='phone_number_error' style='color: red; padding: 5px; font-weight: bold;'> Phone number is not valid </span>").insertAfter("#id_phone_number")
+                setInterval(() => {
+                    document.getElementById('phone_number_error').remove()
+                }, 3000)   
+
+                e.preventDefault()
+            }
+        } 
+            
+        const checkImgSize = () => {
+            const imageEle = document.getElementById('id_profile_pic')
+            const maxSize = 1024 * 2 
+            const imageSize = imageEle.files[0].size / 1024
+            if (imageSize > maxSize) {
+                $("<span id='profile_pic_error' style='color: red; padding: 5px; font-weight: bold;'> File size should not exceed 2MB </span>").insertAfter("#id_profile_pic")
+                setInterval(() => {
+                    document.getElementById('profile_pic_error').remove()
+                }, 3000)  
+
+                e.preventDefault()
+            }
+        }
+            
+        validatePhoneNum(phoneNumEle.value) 
+        checkImgSize() 
+
+        });
+    </script>
+    
+{% endblock custom_js %}

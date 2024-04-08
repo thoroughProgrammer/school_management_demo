@@ -1,0 +1,77 @@
+{% extends 'admin_template/base_template.html' %}
+{% block page_title %}
+Search Student
+{% endblock page_title %}
+{% block main_content %}
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+
+
+          <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                {% if searched %}
+                <h3 class="card-title">You Searched For {{ searched }}</h3>
+                {% else %}
+                <h3 class="card-title">Search Student ...</h3>
+                {% endif %}
+                <div class="card-tools">
+                  <div class="input-group input-group-sm" style="width: 150px;">
+                    <form action="" method="post">
+                      {% csrf_token %}
+                    <input type="search" aria-label="Search" name="searched" class="form-control float-right" placeholder="Search Student by Class or Student ID">
+
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                    </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>First Name</th>
+                      <th>Last Name</th>
+                      <th>Address</th>
+                      <th>Gender</th>
+                      <th>Profile Pic</th>
+                      <th>Class</th>
+                      <th>Last Login</th>
+                      <th>Date Joined</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {% for student in student_search %}
+                    <tr>
+                      <td>{{ student.user.id }}</td>
+                      <td>{{ student.user.first_name }}</td>
+                      <td>{{ student.user.last_name }}</td>
+                      <td>{{ student.address }}</td>
+                      <td>{{ student.user.gender }}</td>
+                      <td><img src="{{ student.user.profile_pic.url }}" style="width:100px"/></td>
+                      <td>{{ student.class_level.class_level_name }}</td>
+                      <td>{{ student.user.last_login }}</td>
+                      <td>{{ student.user.date_joined }}</td>
+                      <td><a href="{% url 'edit_student' student_id=student.user.id %}" class="btn btn-success">Edit</a></td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /.content -->
+{% endblock main_content %}
+

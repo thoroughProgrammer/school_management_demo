@@ -1,0 +1,180 @@
+{% load static %}
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <!-- Brand Logo -->
+      <a href="{% url 'admin_home' user_school_id %}" class="brand-link">
+        <img src="{% static 'dist/img/AdminLTELogo.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+            style="opacity: .8">
+        <span class="brand-text font-weight-light">Green Spring School</span>
+      </a>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+          <div class="image">
+            {% if user.profile_pic %}
+            <img src="{{ user.profile_pic.url }}" class="img-circle elevation-2" alt="User Image">
+            {% else %}
+            <img src="{% static "assets/images/user.jpg" %}" class="img-circle elevation-2" alt="User Image">
+            {% endif %}
+          </div>
+          <div class="info">
+            <a href="{% url 'admin_profile' user_school_id %}" class="d-block">Welcome {{ user_first_name }} {{ user_last_name }}</a>
+            <p style="color: #fff;">Profile ID: {{ user_school_id }}</p>
+          </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <!-- Add icons to the links using the .nav-icon class
+                with font-awesome or any other icon font library -->
+
+            <li class="nav-item">
+              {% url 'admin_home' user_school_id as admin_home %}
+              <a href="{{ admin_home }}" class="nav-link {% if admin_home in request.path %} active {% endif %}">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                  Home
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              {% url 'manage_staff' user_school_id as manage_staff %}
+              {% url 'edit_staff' user_school_id staff.user.school_id as edit_staff %}
+              <a href="{{ manage_staff }}" class="nav-link {% if manage_staff in request.path %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}">
+                <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                <p>
+                  Manage Staff
+                </p>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              {% url 'add_staff' user_school_id as add_staff %}
+              <a href="{{ add_staff }}" class="nav-link {% if request.path == add_staff %} active {% endif %}">
+                <i class="nav-icon fas fa-th"></i>
+                <p>
+                  Add Staff
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              {% url 'manage_student' user_school_id as manage_student %}
+              {% url 'edit_student' user_school_id student.school_id as edit_student %}
+              <a href="{{ manage_student }}" class="nav-link {% if manage_student in request.path %} active {% endif %} {% if request.path == edit_student %} active {% endif %}">
+                <i class="nav-icon fas fa-user-graduate"></i>
+                <p>
+                  Manage Students
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              {% url 'add_student' user_school_id as add_student %}
+              <a href="{{ add_student }}" class="nav-link {% if request.path == add_student %} active {% endif %}">
+                <i class="nav-icon fas fa-th"></i>
+                <p>
+                  Add Student
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              {% url 'manage_class' user_school_id as manage_class %}
+              {% url 'edit_class' user_school_id class_level.id as edit_class %}
+              <a href="{{ manage_class }}" class="nav-link {% if manage_class in request.path %} active {% endif %} {% if request.path == edit_class %} active {% endif %}">
+                <i class="nav-icon fas fa-chalkboard"></i>
+                <p>
+                  Manage Class
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+            {% url 'add_class' user_school_id as add_class %}
+              <a href="{{ add_class }}" class="nav-link {% if request.path == add_class %} active {% endif %}">
+                <i class="nav-icon fas fa-th"></i>
+                <p>
+                  Add Class
+                </p>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              {% url 'manage_subject' user_school_id as manage_subject %}
+              {% url 'edit_subject' user_school_id subject.id as edit_subject %}
+              <a href="{{ manage_subject }}" class="nav-link {% if manage_subject in request.path %} active {% endif %} {% if request.path == edit_subject %} active {% endif %}">
+                <i class="nav-icon fas fa-book"></i>
+                <p>
+                  Manage Subject
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              {% url 'add_subject' user_school_id as add_subject %}
+              <a href="{{ add_subject }}" class="nav-link {% if request.path == add_subject %} active {% endif %}">
+                <i class="nav-icon fas fa-th"></i>
+                <p>
+                  Add Subject
+                </p>
+              </a>
+            </li>
+
+
+            <li class="nav-item">
+              {% url 'manage_session' user_school_id as manage_session %}
+              {% url 'edit_session' user_school_id session.id as edit_session %}
+              <a href="{{ manage_session }}" class="nav-link {% if manage_session in request.path %} active {% endif %} {% if request.path == edit_session %} active {% endif %}">
+                <i class="nav-icon fas fa-graduation-cap"></i>
+                <p>
+                  Manage Session 
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              {% url 'add_session' user_school_id as add_session %}
+              <a href="{{ add_session }}" class="nav-link {% if request.path == add_session %} active {% endif %}">
+                <i class="nav-icon fas fa-th"></i>
+                <p>
+                  Add Session
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              {% url 'manage_fee' user_school_id as manage_fee %}
+              {% url 'edit_fee' user_school_id fee.custom_id as edit_fee %}
+              <a href="{{ manage_fee }}" class="nav-link {% if manage_fee in request.path %} active {% endif %} {% if request.path == edit_fee %} active {% endif %}">
+                <i class="nav-icon fas fa-th"></i>
+                <p>
+                  Manage Fee
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              {% url 'add_fee' user_school_id as add_fee %}
+              <a href="{{ add_fee }}" class="nav-link {% if request.path == add_fee %} active {% endif %}">
+                <i class="nav-icon fas fa-th"></i>
+                <p>
+                  Add Fee
+                </p>
+              </a>
+            </li>
+            
+            
+          </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+      </div>
+      <!-- /.sidebar -->
+    </aside>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

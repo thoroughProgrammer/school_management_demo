@@ -1,0 +1,217 @@
+{% extends 'staff_templates/base_template.html' %}
+
+{% block custom_css %}
+<style>
+
+  .chartBox {
+        width: 80%;
+        padding: 20px;
+        border-radius: 20px;
+        border: solid 2px rgb(0, 0, 7);
+        background: white;
+   }
+
+</style>
+{% endblock custom_css %}
+
+{% block page_title %}
+    Staff Dashboard
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid">
+
+            {% comment %} Boxes Section Starts {% endcomment %}
+            <div class="container">
+                <div class="row">   
+
+                    <div class="col-md-4">
+                        <div style="margin: 20px 10px;">
+                        <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3>{{ students_count }}</h3>
+
+                            <p>Students Under Me</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-stats-bars"></i>
+                        </div>
+                        <a href="" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div style="margin: 20px 10px;">
+                        <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ subject_count }}</h3>
+
+                            <p>Total Subjects</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-pie-graph"></i>
+                        </div>
+                        <a href="" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div style="margin: 20px 10px;">
+                        <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ assessment_count }}</h3>
+
+                            <p>Assessments Completed this Term</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-pie-graph"></i>
+                        </div>
+                        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% comment %} Boxes Section Ends {% endcomment %}
+
+            <div class="row">
+                <div class="col-md-12">
+              
+              <div class="card card-primary">
+
+                <div class="card-header">
+                  <h3 class="card-title">Student Performance in Subjects Taught ({{current_session}} - {{current_term}})</h3>
+                </div>
+                
+  
+                  <div class="card-body">
+                <div id="chartCard">
+                    
+                </div>
+                  </div>
+
+              </div>
+
+                </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+      </section>
+
+  {% endblock main_content %}
+
+  {% block custom_js %}
+    <script>
+    //--------------
+    //- STACKED BAR CHART -
+    //--------------
+    // Get context with jQuery - using jQuery's .get() method.
+    
+    const chartGenerator = (subject_student_assessment_scores_dict) => {
+      $('#chartCard').empty()
+      
+      for (let key of Object.keys(subject_student_assessment_scores_dict)) {
+        var student_list
+        var assessments_label_list
+        var bg_color_list
+        var z = new Array{{key}}
+        var chartId = `#myChart${z[0]}`
+
+        
+        let ele = `<div class="row">
+        
+                <div class="card">
+
+                <div class="card-header">
+                    <h3 class="card-title" style="text-transform: capitalize">${z[1]}</h3>
+                </div>
+
+                <div class="card-body">
+                    <div class="chartBox">
+                        <canvas id="#myChart${z[0]}"></canvas>
+                    </div>
+                </div>
+
+                </div>
+                </div>`
+        $('#chartCard')[0].append($(ele)[0])
+
+        var chartData = subject_student_assessment_scores_dict[key]
+        
+        for (let key1 of Object.keys(subject_students_dict)) {
+            if(key1 == z[0]){
+                student_list = subject_students_dict[key1]
+            }
+        }
+        for (let key2 of Object.keys(subject_assessments_label_dict)) {
+            if(key2 == z[0]){
+                assessments_label_list = subject_assessments_label_dict[key2]
+            }
+        }
+        for (let key3 of Object.keys(subject_bg_color_dict)) {
+            if(key3 == z[0]){
+                bg_color_list = subject_bg_color_dict[key3]
+            }
+        }
+
+        var ctx = document.getElementById(chartId).getContext('2d');
+
+        var stackedBarChart = {
+            type: 'bar',
+            data: {
+                labels: student_list,
+                datasets: [],
+            },
+            options: {
+                indexAxis: 'y',
+                tooltips: {
+                displayColors: true,
+                callbacks:{
+                    mode: 'x',
+                },
+                },
+                scales: {
+                xAxes: [{
+                    stacked: true,
+                    gridLines: {
+                    display: false,
+                    }
+                }],
+                yAxes: [{
+                    stacked: true,
+                    ticks: {
+                    beginAtZero: true,
+                    },
+                    type: 'linear',
+                }]
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: { position: 'top' },
+            }
+        };
+        
+        subject_student_assessment_scores_dict[key].forEach(function (e1,e2) {
+            stackedBarChart.datasets.push({
+                label: assessments_label_list[e2],
+                backgroundColor: bg_color_list[e2],
+                data: JSON.parse(e1),
+                borderRadius: 20,
+                barPercentage: 0.25,
+                categoryPercentage: 0.5
+            });
+        });11
+
+        var myChart = new Chart(ctx, stackedBarChart);
+      },
+    };
+
+    </script>
+  {% endblock custom_js %}

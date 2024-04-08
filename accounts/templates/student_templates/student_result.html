@@ -1,0 +1,72 @@
+{% extends 'student_templates/base_template.html' %}
+{% block custom_css %}
+  <style>
+    th {
+      padding: 20px;
+      text-align: center;
+    }
+    td {
+      padding: 20px;
+      text-align: center;
+    }
+
+    table th:nth-of-type(1),
+    table td:nth-of-type(1) {
+      text-align: left;
+    }
+  </style>
+{% endblock custom_css %}
+{% block page_title %}
+Result
+{% endblock page_title %}
+{% block main_content %}
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+                    <div class="row">
+              <div class="col-md-12">
+            <!-- general form elements -->
+
+            <!-- /.card -->
+            {% for term in terms %}
+              {% if term.studentassessment_set.exists and user.student.term_enrolled.id <= term.id %}
+                <div class="card card-primary">
+                    <div class="card-header">
+                      <h3 class="card-title">{{term}}</h3>
+                    </div>
+                    
+                    {% for subject in subjects %}
+                    <div class=" ">
+                      <table class="" cellpadding="0px">
+                          <tr>
+                              <th class="">Subject</th>
+                              {% for assessment in assessments %}
+                                {% if assessment.term == term and assessment.subject == subject %}
+                                <th class="">{{ assessment.assessment_desc }}</th>
+                                {% endif %}
+                              {% endfor %}
+                          </tr>
+                            <tr>
+                              <td>{{subject.subject_name}}</td>
+                                {% for assessment in assessments %} 
+                                  {% if assessment.term == term and assessment.subject == subject %}
+                                    <td class="">{{assessment.score}}</td>
+                                  {% endif %}
+                                {% endfor %}
+                            </tr>
+                      </table>
+                    </div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+            {% endfor %}
+
+
+
+          </div>
+          </div>
+      </div>
+    </section>
+    <!-- /.content -->
+{% endblock main_content %}

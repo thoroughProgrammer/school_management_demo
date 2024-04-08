@@ -1,0 +1,148 @@
+{% extends 'admin_templates/base_template.html' %}
+
+{% block page_title %}
+    Manage Session
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid">
+
+            <div>
+                <a class="btn btn-primary" href="{% url 'add_session' user_school_id%}" role="button">+ Add Session</a> <br/>&nbsp;
+                <div>
+                    <div>
+                        {% for session in sessions %}
+                            {% if session.current_session == True %}
+                                <h4>
+                                    {{ session }} 
+                                    {% if current_term %}
+                                        {{ current_term }}
+                                    {% endif %}
+                                </h4>                        
+                             
+                        </div>
+                            {% endif %}
+                        {% endfor %}
+
+                    <a class="btn btn-secondary" href="{% url 'select_session' user_school_id%}" role="button">Select Current Session</a> <br/>&nbsp;
+                </div>
+    
+            </div>
+
+            
+            {% if messages %}
+                                <div class="form-group">
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == "error" %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% elif message.tags == "success" %}
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                </div>
+                                {% endif %}
+
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Session Details</h3>
+
+                            <div class="card-tools">
+                            <div class="input-group input-group-sm" style="width: 150px;">
+                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                <div class="input-group-append">
+                                <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover text-nowrap">
+                            <thead>
+                                <tr>
+                                <th>Session Start</th>
+                                <th>Session End</th>
+                                <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in sessions %}
+                                <tr>
+                                <td>{{ session.session_start }}</td>
+                                <td>{{ session.session_end }}</td>
+                                <td>
+                                    <a href="{% url 'edit_session' user_school_id session.id %}" class="btn btn-success">Edit</a> 
+                                    <a href="#" data-href="{% url 'delete_session' user_school_id session.id %}" class="btn btn-danger preDeleteBtn" data-toggle="modal" data-target=".bd-example-modal-sm">Delete</a>
+                                </td>
+                                </tr>
+                                {% endfor %}
+                                
+                            </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                        </div>
+                    <!-- /.card -->
+
+                    <div id="preDeleteModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-sm">
+                          <div class="modal-content">
+                            <div id="preDeleteModalContent" class="mb-3 mt-1 text-center">
+                            </div>
+                            <div class="d-flex justify-content-center mb-3">
+                              <button type="button" id="cancelBtn"id="" class="btn btn-secondary btn-sm btn-success mr-3" data-dismiss="modal">cancel</button>
+                              <a type="button" id="deleteBtn" class="btn btn-sm btn-danger">delete</a>
+                            </div>
+                        </div>    
+                    </div>
+
+                </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+      </section>
+
+  {% endblock main_content %}
+
+  {% block custom_js %}
+
+    <script>
+
+    $(document).on('click', '.preDeleteBtn', e => {
+        const href = e.target.dataset.href
+        // set modal message
+        const modalMsgEl = document.getElementById('preDeleteModalContent')
+        modalMsgEl.innerText = `Are you sure you want to delete?`
+        // set href attribute of delete button
+        const deleteBtnEl = document.getElementById('deleteBtn')
+        deleteBtnEl.setAttribute('href', href)
+        $("#preDeleteModal").modal('show')
+
+    } )
+
+    $(document).on('click', '#deleteBtn', e => {
+        $("#preDeleteModal").modal('hide')
+    })
+    </script>
+
+{% endblock custom_js %}

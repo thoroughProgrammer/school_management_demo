@@ -1,0 +1,831 @@
+{% extends 'staff_templates/base_template.html' %}
+ {% load custom_filters_tags %} 
+ {% block page_title %} Add Result | {{ user_school_id }} 
+ {% endblock page_title %} 
+ {% block main_content %} 
+ {% load static %}
+
+<section class="content">
+  <div class="container-fluid" id="messages">
+    {% if messages %}
+    <div class="form-group">
+      <div class="col-12">
+        {% for message in messages %} {% if message.tags == "error" %}
+        <div
+          class="alert alert-danger alert-dismissible fade show"
+          role="alert"
+          style="margin-top: 10px"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="close"
+            data-dismiss="alert"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        {% elif message.tags == "success" %}
+        <div
+          class="alert alert-success alert-dismissible fade show"
+          role="alert"
+          style="margin-top: 10px"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="close"
+            data-dismiss="alert"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="mb-5 card p-2">
+          <div class="input-group mb-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="assessment_type"
+                >Select Session</label
+              >
+            </div>
+            <select
+              class="custom-select"
+              name="session"
+              id="session"
+            >
+              {% for session in sessions %}
+              <option {% if session.id == current_session.id %} selected {% endif %} value="{{ session.id }}">
+                {{ session }}
+              </option>
+              {% endfor %}
+            </select>
+
+            <div class="input-group-prepend ml-3">
+              <label class="input-group-text" for="assessment_type"
+              >Select Term</label
+            >            
+            </div>
+            <select
+              class="custom-select"
+              name="term"
+              id="term"
+            >
+              <option  >
+              </option>
+            </select>
+            <br />&nbsp;
+          </div>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="assessment_type"
+                >Assessment Type</label
+              >
+            </div>
+            <select
+              class="custom-select"
+              name="assessment_type"
+              id="assessment_type"
+            >
+            <option value="" selected disabled>choose assessment type</option>
+              {% for assessment in assessment_choices %}
+              <option value="{{ assessment.0 }}">
+                {{ assessment.1.title }}
+              </option>
+              {% endfor %}
+            </select>
+
+            <div class="input-group-prepend ml-3">
+              <span class="input-group-text">Assessment</span>
+            </div>
+            <input
+              type="text"
+              aria-label="assessment name"
+              id="assessment_desc"
+              class="form-control"
+            />
+
+            <a
+              class="btn btn-primary ml-3"
+              href="#"
+              id="add_assessment_btn"
+              role="button"
+            >
+              Add Assessment
+            </a>
+            <br />&nbsp;
+          </div>
+
+          <div id="new_custom_error"></div>
+        </div>
+
+        <!-- general form elements -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-tools w-100">
+              <div class="d-flex justify-content-between w-100">
+                <div>
+                        <a class="btn btn-primary" href="{% url 'staff_subjects' user_school_id %}" role="button">Back to Subjects</a> <br/>&nbsp;
+                </div>
+                <div id="selected_session_term">
+                  {{ current_session}} {{current_term}}
+                </div>
+                <div class="input-group input-group-sm" style="width: 150px">
+                  <form action="" method="post">
+                    {% csrf_token %}
+  
+                    <div class="input-group-append">
+                      <input
+                        type="search"
+                        aria-label="Search"
+                        name="searched"
+                        class="form-control float-right"
+                      />
+  
+                      <button type="submit" class="btn btn-default">
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+            </div>
+
+              
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap" name="table">
+                <thead>
+                </thead>
+
+                <tbody>
+                </tbody>
+              </table>
+              <div id="spinner_div" class="text-center">
+                <div class="spinner-grow text-primary" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-secondary" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-success" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-danger" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-warning" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-info" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-light" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-dark" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+              </div>
+            <div id="results"></div>
+            <!-- errors go here -->
+            
+          </div>
+          <!-- /.card-body -->
+
+        </div>
+        <!-- /.card -->
+        <button type="button" id="save_btn" class="btn btn-success mb-3">Save</button>
+
+      </div>
+    </div>
+
+    <div id="preDeleteModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div id="preDeleteModalContent" class="mb-3 mt-1 text-center">
+          </div>
+          <div class="d-flex justify-content-center mb-3">
+            <button type="button" id="cancelBtn"id="" class="btn btn-secondary btn-sm btn-success mr-3">cancel</button>
+            <button type="button" id="deleteBtn" class="btn btn-secondary btn-sm btn-danger">delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.container-fluid -->
+</section>
+
+<style>
+  i:hover {
+    cursor: pointer;
+  }
+
+</style>
+
+{% endblock main_content %} 
+
+{% block custom_js %}
+
+<script>
+
+  // state store for page
+  let store = {}
+
+  // add new, edited, and deleted data attributes to table elements
+  let tempTable = $('table')[0]
+  tempTable.dataset.newAssessments = JSON.stringify([])
+  tempTable.dataset.editedAssessments = JSON.stringify([])
+  tempTable.dataset.deletedAssessments = JSON.stringify([])
+
+  /*
+  on click of add assessment button
+  adds span element in thead>tr with innerHtml text of #assessment_desc value
+    add assessment-title data attribute to span element
+  get rows in tbody>tr
+    loop through rows
+    create input element
+    add school-id, assessment-title, assessment-type data attributes to input elemnent
+  */
+  $("#add_assessment_btn").click((e) => {
+
+
+    // validate assessment type
+    let assessmentTypeEl= document.getElementById('assessment_type')
+    if (assessmentTypeEl.value.length === 0) {
+      assessmentTypeEl.setCustomValidity("Choose an assessment type")
+      assessmentTypeEl.reportValidity()
+      throw new Error(`Choose an assessment type`)
+    }
+
+    let assessmentDescInput = document.getElementById('assessment_desc')
+    checkEmptyOrUnique(assessmentDescInput)
+
+
+    // create title th element
+    let titleEl = document.createElement("th");
+    // create text span element
+    let textSpan = document.createElement('span')
+    textSpan.setAttribute('class', 'assessmentTitle')
+    textSpan.dataset.assessmentTitle = document.getElementById('assessment_desc').value.trim()
+    // create icons span element
+    let iconSpan = document.createElement('span')
+    // delete icon element
+    let deleteIconBtn = `<i class="fas fa-trash text-danger ml-2 preDeleteBtn" data-toggle="modal" data-target=".bd-example-modal-sm"></i>`
+
+    // append text element and icon element to title element
+    $(iconSpan).append(deleteIconBtn)
+    textSpan.innerText = document.getElementById("assessment_desc").value.trim()
+    titleEl.appendChild(textSpan)
+    titleEl.appendChild(iconSpan)
+
+    // append title element to thead element
+    let theadTrEl = document
+      .getElementsByTagName("thead")[0]
+      .getElementsByTagName("tr")[0];
+    theadTrEl.appendChild(titleEl);
+
+    // get rows in table body element tbody>tr
+    let tbodyTrEl = document
+      .getElementsByTagName("tbody")[0]
+      .getElementsByTagName("tr");
+
+    // loop through rows
+    for (let i of Object.keys(tbodyTrEl)) {
+      // create td element
+      let tdEl = document.createElement("td");
+      tdEl.classList.add('text-center')
+
+      // create input element for score
+      let inputEl = document.createElement("input");
+      inputEl.setAttribute("name", "score");
+      inputEl.setAttribute("maxlength", 7);
+      inputEl.setAttribute("value", 0);
+      inputEl.style.width = "8ch";
+      inputEl.dataset.schoolId = tbodyTrEl[i].cells[0].innerText.trim()
+      inputEl.dataset.assessmentType = document.getElementById("assessment_type").value.trim();
+      inputEl.dataset.assessmentTitle = document.getElementById("assessment_desc").value.trim();
+      $(inputEl).keyup((d) => checkScoreIsNum(d.target))
+
+      tdEl.appendChild(inputEl);
+      tbodyTrEl[i].appendChild(tdEl);
+    }
+
+    // get table element
+    let tableEl = $('table')[0]
+    // get current data attribute values from table 
+    let newAssessmentArray = JSON.parse(tableEl.dataset.newAssessments)
+    // push new changes to assessment array 
+    newAssessmentArray.push(textSpan.innerText.trim())
+    // set new-assessments data attribute to newAssessmentArray
+    tableEl.dataset.newAssessments = JSON.stringify(newAssessmentArray)
+    // set assessment type back to default
+    assessmentTypeEl.value = ""
+
+  });
+
+
+
+  /*
+    on click for edit button
+    replaces span of thead>tr>th element with input element
+    assigns innerText of thead>tr>th element to new input element
+    loops through respective column elements replacing span tag with input tag assign their innerText 
+      to value attribute
+    adds assessment-title data attributes to respective elements enabling easy quering for a group of
+      assessments
+    adds assessment-id data attributes to respective elements
+    adds edited assessment title to edited-assessments data attribute of table tag
+  */
+  $(document).on('click', '.editBtn', function(e) {
+    // get title element
+    let titleEl = e.target.parentElement.parentElement.getElementsByClassName('assessmentTitle')[0]
+    let assessmentTitle = titleEl.dataset.assessmentTitle
+
+    // create title input element
+    let inputEl = document.createElement('input')
+    inputEl.dataset.assessmentTitle = assessmentTitle
+    $(inputEl).attr('value', titleEl.innerText.trim())
+    $(inputEl).attr('class', "assessmentTitle")
+    $(inputEl).keyup((d) => checkEmptyOrUnique(d.target))
+
+    // replace title element span with input element
+    $(titleEl).replaceWith(inputEl)
+
+    // remove edit button element
+    $(e.target).remove()
+
+    let column = $(`[data-assessment-title="${assessmentTitle}"]`)
+    for (let _=1; _<column.length; _++) {
+
+      // create score input element
+      let inputEl = document.createElement('input')
+      inputEl.style.width = '8ch'
+      inputEl.value = column[_].innerText.trim()
+      inputEl.dataset.assessmentId = column[_].dataset.assessmentId
+      inputEl.dataset.assessmentTitle = assessmentTitle
+      $(inputEl).keyup((d) => checkScoreIsNum(d.target))
+
+      // replace score element with input element
+      $(column[_]).replaceWith(inputEl)
+    }
+
+    // get table element
+    let tableEl = $('table')[0]
+    // get edited data attribute value
+    // push newly edited assessment title to array
+    let editedAssessmentArray = JSON.parse(tableEl.dataset.editedAssessments)
+    editedAssessmentArray.push(titleEl.innerText.trim())
+    // set edited-assessment data attribute to editedAssessmentArray
+    tableEl.dataset.editedAssessments = JSON.stringify(editedAssessmentArray)
+  })
+
+
+
+  /*
+  on click for delete icon
+  pre delete
+  pass assessment title to modal element
+  */
+ $(document).on('click', '.preDeleteBtn', e => {
+  // get element title from data attribute
+  let titleEl = e.target.parentElement.parentElement.getElementsByClassName('assessmentTitle')[0]
+  let title = titleEl.dataset.assessmentTitle.trim()
+
+
+  // set modal message
+  let modalMsgEl = document.getElementById('preDeleteModalContent')
+  modalMsgEl.innerText = `Are you sure you want to delete ${title}`
+
+
+  // set title data attribute of delete button
+  let deleteBtnEl = document.getElementById('deleteBtn')
+  deleteBtnEl.dataset.modalAssessmentTitle = title
+ })
+
+
+  
+  /*
+  on click for delete button
+  take assessment-title value and append to 
+  deleted-assessments data attribute
+  get elements matching assessment title data attribute
+  remove corresponding td elements from DOM
+  */ 
+  $(document).on('click', '#deleteBtn', e => {
+    // get assessment title 
+    let title = e.target.dataset.modalAssessmentTitle.trim()
+
+    //get table
+    let tableEl = $('table')[0]
+    let editedAssessmentArray = JSON.parse(tableEl.dataset.editedAssessments)
+    let newAsssessmentArray = JSON.parse(tableEl.dataset.newAssessments)
+
+    // get deleted data attribute value
+    // push deleted assessment title to array
+    let deletedAssessmentArray = JSON.parse(tableEl.dataset.deletedAssessments)
+    deletedAssessmentArray.push(title)
+
+    // remove deleted title from edited assessment array if it is edited
+    let filteredEditedAssessmentArray = editedAssessmentArray.filter(ele=>ele !== title)
+    // remove deleted title from new assessment array if it is new
+    let filteredNewAssessmentArray = newAsssessmentArray.filter(ele => {
+      // remove title added to deletedAssessmentArray 
+      if (ele === title) {
+        deletedAssessmentArray.splice(deletedAssessmentArray.findIndex(s => s === title), 1)
+      }
+      return ele !== title
+    })
+
+    // update data attribute
+    tableEl.dataset.editedAssessments = JSON.stringify(filteredEditedAssessmentArray)
+    tableEl.dataset.newAssessments = JSON.stringify(filteredNewAssessmentArray)
+    tableEl.dataset.deletedAssessments = JSON.stringify(deletedAssessmentArray)
+
+    // get elements matching data attribute title
+    // and remove them from the DOM
+    let matchedElements = $(`[data-assessment-title="${title}"`)
+    $(matchedElements).each( (index) => {
+      $(matchedElements[index].parentElement).remove()
+    })
+
+    $("#preDeleteModal").modal('hide')
+  })
+
+  $(document).on('click', "#cancelBtn", e => {
+    $("#preDeleteModal").modal('hide')
+  })
+
+
+
+  /*
+  returns stringified JSON object 
+    { subject_id: "", new_assessments: [], 
+      edited_assessments: [], 
+      deleted_assessments: []
+    }
+    new: [{student_school_id, assessment_type, assessment_title, score}]
+    edited: [{assessment_id,  assessment_title, assessment_score}]
+    deleted: ['assessment_id']
+  */
+  function get_assessments() {
+    let tempNewAssessments = $('table')[0].dataset.newAssessments
+    let tempEditedAssessments = $('table')[0].dataset.editedAssessments
+    let tempDeletedAssessments = $('table')[0].dataset.deletedAssessments
+
+    let newAssessments = JSON.parse(tempNewAssessments)
+    let editedAssessments = JSON.parse(tempEditedAssessments)
+    let deletedAssessments = JSON.parse(tempDeletedAssessments)
+
+    let newAssessmentsArray = []
+    let editedAssessmentsArray = []
+    let deletedAssessmentsArray = []
+
+    // loop through new assessments
+    for (let i=0; i<newAssessments.length; i++) {
+      let assessmentTitle = newAssessments[i].trim()
+
+      // get elements with assessment-title data attribute eq to assessmentTitle
+      let matchedAssessmentArray = $(`[data-assessment-title="${assessmentTitle}"]`)
+
+      // loop through matched array
+      // start at index 1 to avoid thead>tr>th>span element
+      for (let j=1; j<matchedAssessmentArray.length; j++) {
+        let studentSchoolId = matchedAssessmentArray[j].dataset.schoolId
+        let assessmentType = matchedAssessmentArray[j].dataset.assessmentType
+        let score = matchedAssessmentArray[j].value.trim()
+
+        // validate score
+        checkScoreIsNum(matchedAssessmentArray[j])
+
+        let assessment = {
+          student_school_id: studentSchoolId, 
+          assessment_type: assessmentType, 
+          assessment_desc: assessmentTitle, 
+          assessment_score: score
+        }
+        
+        newAssessmentsArray.push(assessment)
+      }
+    }
+
+    // loop through edited assessments
+    for (let i=0; i<editedAssessments.length; i++) {
+      let assessmentTitle = editedAssessments[i]
+
+      // get elements with assessment-title data attribute eq to assessmentTitle
+      let matchedAssessmentArray = $(`[data-assessment-title="${assessmentTitle}"]`)
+      checkEmptyOrUnique(matchedAssessmentArray[0])
+
+      // loop through matched array
+      // start at index 1 to avoid thead>tr>th>span element
+      for (let j=1; j<matchedAssessmentArray.length; j++) {
+        let assessmentId = matchedAssessmentArray[j].dataset.assessmentId
+        let newAssessmentTitle = matchedAssessmentArray[0].value.trim()
+        let score = matchedAssessmentArray[j].value.trim()
+
+        // validate score
+        checkScoreIsNum(matchedAssessmentArray[j])
+
+        let assessment = {
+          assessment_id: assessmentId,
+          assessment_desc: newAssessmentTitle,
+          assessment_score: score
+        }
+
+        editedAssessmentsArray.push(assessment)
+      }
+    }
+
+    // loop through deleted assessments
+    for (let i=0; i<deletedAssessments.length; i++) {
+      let assessmentTitle = deletedAssessments[i]
+      deletedAssessmentsArray.push(assessmentTitle)
+    }
+
+    const sessionId = $('#session').val()
+    let subjectId = {{ subject.id }}
+    let termId = Number(document.getElementById('term').value )
+    let data = { 'subject_id': subjectId, "term_id": termId, 'session_id': sessionId }
+    if (newAssessmentsArray.length > 0) {data["new_assessments"] = newAssessmentsArray}
+    if (editedAssessmentsArray.length > 0) {data["edited_assessments"] = editedAssessmentsArray}
+    if (deletedAssessmentsArray.length > 0) {data["deleted_assessments"] = deletedAssessmentsArray}
+
+    return JSON.stringify({ ...data })
+  }
+
+
+  // validate score
+  function checkScoreIsNum(element) {
+    let trimmedNum = element.value.trim()
+    if (isNaN(trimmedNum) || trimmedNum === '') {
+      element.setCustomValidity("Field accepts only numbers and can't be empty")
+      element.reportValidity()
+      throw new Error(`Field accepts only numbers and can't be empty`)
+    }
+  }
+
+  
+  // validate assessment title
+  function checkEmptyOrUnique(element) {
+
+    // check if assessment description is empty
+    if (element.value.trim() === '') {
+      element.setCustomValidity("Field can't be empty")
+      element.reportValidity()
+      throw new Error(`Field can't be empty"`)
+    }
+
+    // check if assessment description already exists
+    let assessmentTitles = document.getElementsByClassName('assessmentTitle')
+    for (let _ in Object.keys(assessmentTitles)) {
+      let title = assessmentTitles[_].innerText.trim().toLowerCase()
+      if (title === element.value.trim().toLowerCase()) {
+        element.setCustomValidity("Assessment already exists, use a different description")
+        element.reportValidity()
+        setInterval(() => {})
+        throw new Error('Assessment already exists, use a different description')
+      }
+    }
+  }
+  
+
+  // on save 
+  $("#save_btn").click((e) => {
+    e.preventDefault();
+    let data = get_assessments()
+    save_assessment(data);
+  });
+
+  function save_assessment(data) {
+    $.ajax({
+      url: "{% url 'save_student_result' user_school_id %}", // the endpoint
+      type: "POST", // http method
+      data: {  'data': data }, // data sent with the post request
+
+
+      // handle a successful response
+      success: function (res) {
+        window.location.replace(JSON.parse(res).redirectUrl)
+      },
+
+      // handle a non-successful response
+      error: function (xhr, res, err) {
+        window.location.replace(res.redirectUrl)
+      },
+    });
+  }
+
+  // on page load get assessments via ajax
+  const currentSessionId = {{current_session.id}}
+  const currentTermId = {{current_term.id}}
+  get_session_assessments("", currentSessionId, currentTermId)
+
+
+  // on change of session
+  // send ajax request for term data
+  // and assessments for that session
+  $('#session').on('change', (e) => {
+    let selected_session = e.target.value
+    get_session_assessments(selected_session)
+    e.target.querySelector(`[selected="selected"]`).removeAttribute('selected')
+    e.target.querySelector(`[value="${selected_session}"]`).setAttribute('selected', 'selected')
+    const sessionName = e.target.querySelector(`[value="${selected_session}"]`).innerText.trim()
+    const termName = document.getElementById('term').getElementsByTagName('option')[0].innerText.trim()
+    document.getElementById('selected_session_term').innerText = `${sessionName} ${termName}`
+    const table = $('table')[0]
+    table.style.display = 'none'
+  })
+
+  $('#term').on('change', (e) => {
+    createStudentAssementEntries()  
+    const sessionName = document.getElementById('session').querySelector(`[selected="selected"]`).innerText.trim()
+    const termName = e.target.querySelector(`[value="${e.target.value}"]`).innerText.trim()
+    document.getElementById('selected_session_term').innerText = `${sessionName} ${termName}`
+  })
+
+  function get_session_assessments(sessionId, currentSessionId=false, currentTermId=false) {
+    const spinner = document.getElementById('spinner_div')
+    spinner.style.display = 'block';
+    $.get("{% url 'get_students_assessment' user_school_id %}", {sessionId, subjectId: {{ subject.id }} })
+    .done((res) => {
+      const table = $('table')[0]
+      table.style.display = 'block'
+      store.students = res.students
+      store.current_term_id = res.current_term_id 
+      updateTerms(res.terms, currentSessionId, currentTermId)
+      createStudentAssementEntries()
+      const spinner = document.getElementById('spinner_div')
+      spinner.style.display = 'none';
+    })
+    .fail((res) => {
+      console.log("Failed")
+    })
+  } 
+
+
+  function updateTerms(termsObj, currentSessionId, currentTermId) {
+    const termSelectEl = $('#term').empty()
+    for (const termKey in Object.keys(termsObj)) {
+      
+      if (termsObj[termKey].id <= store.current_term_id) {
+
+      const term = termsObj[termKey]
+      const optionx = `
+              <option value="${term.id}">
+                Term ${term.term}
+              </option>
+      `
+      const option = $(optionx)
+      termSelectEl[0].append(option[0])
+      if (currentSessionId && currentTermId) {
+          $("#session").children(`[value="${currentSessionId}"]`).attr('selected', true)
+          $("#term").children(`[value="${currentTermId}"]`).attr('selected', true)
+      }
+      }
+    }
+  }
+
+  function createStudentAssementEntries() {
+    const term = $('#term').val()
+    try {
+      theadGenerator(store.students[0].assessments[term])
+      $('tbody').empty()
+      for (const student of store.students) {
+        tbodyGenerator(student, term)
+      }
+    } catch (err) {
+      if (err instanceof TypeError) {
+        theadGenerator([])
+        $('tbody').empty()
+        for (const student of store.students) {
+          tbodyGenerator(student, term)
+        }
+      }
+      else {
+        console.log(err)
+      }
+    }
+  }
+
+  // generate table header
+  function theadGenerator(assessments) {
+    const thx1 = `
+                  <tr>
+                    <th>Student ID</th> 
+                    <th>Name</th>
+                  </tr>
+    `
+    const tr = $(thx1)
+
+    assessments.forEach(obj => {
+      const thx2 = ` 
+                    <th>
+                      <span class="assessmentTitle" data-assessment-title="${ obj.assessment_desc }">
+                        ${ obj.assessment_desc }
+                      </span>
+                    </th>
+                  `            
+      const icons = `
+                    <span>
+                      <i class="fas fa-pen editBtn text-primary ml-1" ></i>
+                      <i class="fas fa-trash preDeleteBtn text-danger ml-1" data-toggle="modal" data-target=".bd-example-modal-sm"></i>
+                    </span>
+                  `     
+      const th = $(thx2)
+      th.append(icons)
+      tr.append(th[0])
+    })
+    $('thead').empty()
+    $('thead')[0].append(tr[0])
+  }
+
+  // generate table body
+  function tbodyGenerator(student, term) {
+    const trx = `<tr>
+                    <td>${student.school_id}</td>
+                    <td>${student.last_name + ' ' + student.first_name }</td>
+                    
+                  </tr>`
+    const tr = $(trx)
+    student.assessments[term].forEach(obj => {
+      const tdx = `<td class="text-center">
+                      <span data-assessment-title="${obj.assessment_desc}" data-assessment-id="${obj.id}">
+                        ${obj.score}
+                      </span>
+                    </td>`
+      tr.append(tdx)
+    })
+    $('tbody')[0].append(tr[0])
+  }
+
+  // csrf token setup
+  $(function () {
+    // This function gets cookie with a given name
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie != "") {
+        let cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          let cookie = jQuery.trim(cookies[i]);
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) == name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    let csrftoken = getCookie("csrftoken");
+
+    /*
+    The functions below will create a header with csrftoken
+    */
+
+    function csrfSafeMethod(method) {
+      // these HTTP methods do not require CSRF protection
+      return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
+    }
+    function sameOrigin(url) {
+      // test that a given url is a same-origin URL
+      // url could be relative or scheme relative or absolute
+      let host = document.location.host; // host + port
+      let protocol = document.location.protocol;
+      let sr_origin = "//" + host;
+      let origin = protocol + sr_origin;
+      // Allow absolute or scheme relative URLs to same origin
+      return (
+        url == origin ||
+        url.slice(0, origin.length + 1) == origin + "/" ||
+        url == sr_origin ||
+        url.slice(0, sr_origin.length + 1) == sr_origin + "/" ||
+        // or any other URL that isn't scheme relative or absolute i.e relative.
+        !/^(\/\/|http:|https:).*/.test(url)
+      );
+    }
+
+    $.ajaxSetup({
+      beforeSend: function (xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+          // Send the token to same-origin, relative URLs only.
+          // Send the token only if the method warrants CSRF protection
+          // Using the CSRFToken value acquired earlier
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+      },
+    });
+  });
+  
+</script>
+
+{% endblock custom_js %}

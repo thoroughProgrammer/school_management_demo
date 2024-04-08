@@ -1,0 +1,204 @@
+{% load static %}
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <!-- Brand Logo -->
+  <a href="{% url 'student_home' user_school_id %}" class="brand-link">
+    <img
+      src="{% static 'dist/img/AdminLTELogo.png' %}"
+      alt="AdminLTE Logo"
+      class="brand-image img-circle elevation-3"
+      style="opacity: 0.8"
+    />
+    <span class="brand-text font-weight-light">Green Leaf</span>
+  </a>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Sidebar user panel (optional) -->
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+      <div class="image">
+        {% if user_profile_pic_url %}
+        <img
+          src="{{ user_profile_pic_url }}"
+          class="img-circle elevation-2"
+          alt="User Image"
+        />
+        {% else %} <img src="{% static "assets/images/user.jpg" %}"
+        class="img-circle elevation-2" alt="User Image"> {% endif %}
+      </div>
+      <div class="info">
+        <a href="{% url 'student_profile' user_school_id %}" class="d-block"
+          >{{ user_first_name }} {{ user_last_name }}</a
+        >
+      </div>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <nav class="mt-2">
+      <ul
+        class="nav nav-pills nav-sidebar flex-column"
+        data-widget="treeview"
+        role="menu"
+        data-accordion="false"
+      >
+        <!-- Add icons to the links using the .nav-icon class
+                with font-awesome or any other icon font library -->
+
+        <li class="nav-item">
+          {% url 'student_home' user_school_id as student_home %}
+          <a
+            href="{{ student_home }}"
+            class="nav-link {% if request.path == student_home %} active {% endif %}"
+          >
+            <i class="nav-icon fas fa-tachometer-alt"></i>
+            <p>
+              Home {% comment %}
+              <span class="right badge badge-danger">New</span> {% endcomment %}
+            </p>
+          </a>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            id="navbarDropdown"
+            role="button"
+            href="#collapseFees"
+            class="nav-link dropdown-toggle"
+            data-toggle="collapse"
+            aria-expanded="false"
+            aria-controls="collapseFees"
+          >
+            <i class="nav-icon fas fa-th"></i>
+            <p>Make Payment</p>
+          </a>
+
+          <ul class="collapse" id="collapseFees">
+            <li class="nav-item dropdown">
+              <a
+                id="navbarDropdown"
+                role="button"
+                href="#"
+                class="nav-link dropdown-toggle"
+                data-toggle="collapse"
+                data-target=".term1fee"
+                aria-expanded="false"
+              >
+                TERM 1
+              </a>
+              <ul class="collapse term1fee">
+                {% for fee in fee_term_one %}
+                <li>
+                  <a
+                    class="nav-item dropdown"
+                    href="{% url 'initiate_payment' user_school_id fee.id %}"
+                    >{{ fee.fee_name }}</a
+                  >
+                </li>
+                {% endfor %}
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                id="navbarDropdown"
+                role="button"
+                href="#"
+                class="nav-link dropdown-toggle"
+                data-toggle="collapse"
+                data-target=".term2fee"
+                aria-expanded="false"
+              >
+                TERM 2
+              </a>
+              <ul class="collapse term2fee">
+                {% for fee in fee_term_two %}
+                <li>
+                  <a
+                    class="nav-item dropdown"
+                    href="{% url 'initiate_payment' user_school_id fee.id %}"
+                    >{{ fee.fee_name }}</a
+                  >
+                </li>
+                {% endfor %}
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                id="navbarDropdown"
+                role="button"
+                href="#"
+                class="nav-link dropdown-toggle"
+                data-toggle="collapse"
+                data-target=".term3fee"
+                aria-expanded="false"
+              >
+                TERM 3
+              </a>
+              <ul class="collapse term3fee">
+                {% for fee in fee_term_three %}
+                <li>
+                  <a
+                    class="nav-item dropdown"
+                    href="{% url 'initiate_payment' user_school_id fee.id %}"
+                    >{{ fee.fee_name }}</a
+                  >
+                </li>
+                {% endfor %}
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                id="navbarDropdown"
+                role="button"
+                href="#"
+                class="nav-link dropdown-toggle"
+                data-toggle="collapse"
+                data-target=".otherFees"
+                aria-expanded="false"
+              >
+                OTHER FEES
+              </a>
+              <ul class="collapse otherFees">
+                {% for fee in fee_others %}
+                <li>
+                  <a
+                    class="nav-item dropdown"
+                    href="{% url 'initiate_payment' user_school_id fee.id %}"
+                    >{{ fee.fee_name }}</a
+                  >
+                </li>
+                {% endfor %}
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          {% url 'payment_history' user_school_id as payment_history %}
+          <a
+            href="{{ payment_history }}"
+            class="nav-link {% if request.path == payment_history %} active {% endif %}"
+          >
+            <i class="nav-icon fas fa-th"></i>
+            <p>Payment History</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          {% url 'grade_card' user_school_id as grade_card %}
+          <a
+            href="{{ grade_card }}"
+            class="nav-link {% if request.path == grade_card %} active {% endif %}"
+          >
+            <i class="nav-icon fas fa-th"></i>
+            <p>Grade Card</p>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <!-- /.sidebar-menu -->
+  </div>
+  <!-- /.sidebar -->
+</aside>

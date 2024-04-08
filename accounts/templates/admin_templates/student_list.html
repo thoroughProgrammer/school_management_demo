@@ -1,0 +1,48 @@
+{% extends 'admin_templates/base_template.html' %}
+{% block page_title %}
+{{ course.class_level_name }}
+{% endblock page_title %}
+{% block main_content %}
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+          <div class="row">
+              <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Students Currently In {{ course.class_level_name }}</h3>
+                <div class="card-tools">
+                    <div class="input-group input-group-sm" style="width: 150px;">
+                      <a href="{% url 'student_records_doc' course.id %}" class="btn btn-primary">Download Student List</a>
+                    </div>
+                  </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>School ID</th>
+                      <th>First Name</th>
+                      <th>Last Name</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {% for student in students %}
+                    <tr>
+                      <td>{{ student.user.school_id }}</td>
+                      <td>{{ student.user.first_name }}</td>
+                      <td>{{ student.user.last_name }}</td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+              </div>
+          </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock main_content %}

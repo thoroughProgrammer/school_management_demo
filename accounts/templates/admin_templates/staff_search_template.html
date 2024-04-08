@@ -1,0 +1,71 @@
+{% extends 'admin_template/base_template.html' %}
+{% block page_title %}
+Search Staff
+{% endblock page_title %}
+{% block main_content %}
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+
+
+          <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                {% if searched %}
+                <h3 class="card-title">You Searched For {{ searched }}</h3>
+                {% else %}
+                <h3 class="card-title">Search Staff ...</h3>
+                {% endif %}
+
+                <div class="card-tools">
+                  <div class="input-group input-group-sm" style="width: 150px;">
+                    <form action="" method="post">
+                      {% csrf_token %}
+                    <input type="search" aria-label="Search" name="searched" class="form-control float-right" placeholder="Search Staff by First Name">
+
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                    </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>School ID</th>
+                      <th>First Name</th>
+                      <th>Last Name</th>
+                      <th>Address</th>
+                      <th>Last Login</th>
+                      <th>Date Joined</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {% for staff in staff_search %}
+                    <tr>
+                      <td>{{ staff.user.school_id }}</td>
+                      <td>{{ staff.user.first_name }}</td>
+                      <td>{{ staff.user.last_name }}</td>
+                      <td>{{ staff.address }}</td>
+                      <td>{{ staff.user.last_login }}</td>
+                      <td>{{ staff.user.date_joined }}</td>
+                      <td><a href="/edit_staff/{{ staff.user.id }}" class="btn btn-success">Edit</a></td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /.content -->
+{% endblock main_content %}

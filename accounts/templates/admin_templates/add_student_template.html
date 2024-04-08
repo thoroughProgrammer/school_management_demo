@@ -1,0 +1,119 @@
+{% extends 'admin_templates/base_template.html' %}
+
+{% block page_title %}
+    {% if not class_level %}
+        Add Student
+    {% endif %}
+    {% if class_level %}
+        Add Student to {{ class_level.class_level_name.upper }} Class
+     {% endif %}
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid">
+
+            <a id="back_button" class="btn btn-secondary" href="" role="button"> &larr; Back</a> <br/>&nbsp;
+
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Add Student</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    {% url 'add_student_save' user_school_id as action_path %}
+                    {% include 'admin_templates/form_template.html' with messages=messages form=form action_path=action_path button_text="Add Student" %}
+
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+      </section>
+      <script>
+        var state = false;
+        function toggle(){
+            if(state){
+            document.getElementById("password").setAttribute("type","password");
+            document.getElementById("eye").style.color='#7a797e';
+            state = false;
+            }
+            else{
+            document.getElementById("password").setAttribute("type","text");
+            document.getElementById("eye").style.color='#5887ef';
+            state = true;
+            }
+        }
+      </script>
+
+  {% endblock main_content %}
+
+  
+  {% block custom_js %}
+
+    <script>
+                console.log('lllllllllllllllll')
+        $('form').submit(function(e) {
+        $("#class_level").prop('disabled', true)
+        console.log($("#class_level"))
+        console.lot('lllllllllllllllll')
+        passwordEle = document.getElementById('id_password')       
+        phoneNumEle = document.getElementById('id_phone_number')
+
+        const validatePassword = (password) => {
+            if (password.length > 0 && !password.match(/^[a-z0-9]{6,}+$/i)) {
+                $("<span id='password_error' style='color: red; padding: 5px; font-weight: bold;'> Enter at least 6 alphanumeric characters </span>").insertAfter("#id_password")
+                setInterval(() => {
+                    document.getElementById('password_error').remove()
+                }, 3000)
+
+                e.preventDefault()
+
+                throw new Error('invalid password format')
+            }
+        }
+
+        const validatePhoneNum = (phoneNum) => {
+            if (phoneNum.length > 0 && !phoneNum.match(/^\d{11}$/)) {
+                $("<span id='phone_number_error' style='color: red; padding: 5px; font-weight: bold;'> Phone number is not valid </span>").insertAfter("#id_phone_number")
+                setInterval(() => {
+                    document.getElementById('phone_number_error').remove()
+                }, 3000)   
+
+                e.preventDefault()
+                throw new Error('invalid phone number format')
+            }
+        } 
+
+        const checkImgSize = () => {
+            const imageEle = document.getElementById('id_profile_pic')
+            const maxSize = 1024 * 2 
+            const imageSize = imageEle.files[0].size / 1024
+            if (imageSize > maxSize) {
+                $("<span id='profile_pic_error' style='color: red; padding: 5px; font-weight: bold;'> File size should not exceed 2MB </span>").insertAfter("#id_profile_pic")
+                setInterval(() => {
+                    document.getElementById('profile_pic_error').remove()
+                }, 3000)  
+
+                e.preventDefault()
+                throw new Error("image larger than 2MB")
+            }
+        }
+
+            
+        validatePassword(passwordEle.value)
+        validatePhoneNum(phoneNumEle.value) 
+        checkImgSize() 
+
+        });
+
+    </script>
+{% endblock custom_js %}

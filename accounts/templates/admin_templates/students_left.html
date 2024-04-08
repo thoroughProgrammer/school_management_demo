@@ -1,0 +1,391 @@
+{% extends 'admin_templates/base_template.html' %}
+
+{% block page_title %}
+    <!-- {% if not class_level %}
+        Manage Student  
+    {% endif %}
+     -->
+    <!-- {% if class_level %}
+        <a href="{% url 'manage_class' user_school_id %}">Manage Class</a>  >  <a href="{% url 'manage_class_students' user_school_id class_level.class_level_name %}">{{ class_level.class_level_name.upper }} Students</a>
+    {% endif %} -->
+
+Manage Completed
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid ">
+
+            <div class="d-flex justify-content-between">
+                {% if change_class_level %}
+                    <div class="dropdown mb-3">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            choose class
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for other_class_level in class_levels %}
+                                {% if other_class_level != class_level %}
+                                    <a class="dropdown-item dropdownOption" data-class-id={{other_class_level.id}} href="#" data-toggle="modalk" data-target=".bd-move-modal-sml">{{ other_class_level.class_level_name }}</a>
+                                {% endif %}
+                            {% endfor %}
+                        
+                        </div>
+                    </div>
+                {% else %}
+                    <div>
+                      
+                            <a class="btn btn-primary" href="{% url 'add_student' user_school_id %}" role="button">+ Add Student</a> <br/>&nbsp;
+                     
+                    </div>
+                
+                  
+                {% endif %}
+
+
+            </div>
+
+            
+            
+            {% if messages %}
+                                <div class="form-group">
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == "error" %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% elif message.tags == "success" %}
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                </div>
+                                {% endif %}
+
+            <div class="row">
+                <div id="error-message" class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 10px; color: #f26467; display: none;">
+                    <span class="text-light"> Select at least one student to move </span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Student Details</h3>
+
+                            <div class="card-tools">
+                                <div class="input-group input-group-sm" style="width: 150px;">
+                                  <form action="" method="post">
+                                    {% csrf_token %}
+                                  <input type="search" aria-label="Search" name="searched" class="form-control float-right" placeholder="Search Staff by First Name">
+              
+                                  <div class="input-group-append">
+                                    <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                  </div>
+                                  </form>
+                                </div>
+                              </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover text-nowrap">
+                            <thead>
+                                <tr>
+                                    {% if change_class_level %}
+                                        <th>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                  Select Students
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                  <a class="dropdown-item studentSelect" data-selected-option="allStudents" href="#">All Students</a>
+                                                  <a class="dropdown-item studentSelect" data-selected-option="oldStudents" href="#">Old Students</a>
+                                                  <a class="dropdown-item studentSelect" data-selected-option="newStudents" href="#">New Students</a>
+                                                  <a class="dropdown-item studentSelect" data-selected-option="deselectAllStudents" href="#">Deselect All Students</a>
+                                                </div>
+                                              </div>
+                                        
+                                        </th>
+                                    {% endif %}
+                                    <th>School ID</th>
+                                    <th></th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Other Names</th>
+                                    <th>Email</th>
+                                    <th>Phone Number</th>
+                                    <th>Address</th>
+                                    <th>DOB</th>
+                                    <th>Gender</th>
+                                    <th>Previous Class</th>
+                                    <!-- <th>Profile Pic</th> -->
+                                    <!-- <th>Class</th> -->
+                                    <!-- <th>Last Login</th> -->
+                                    <th>Date Joined</th>
+                                    {% if not change_class_level %}
+                                        <th>Action</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                    <tr>
+                                        {% if change_class_level %}
+                                            <td class="text-center"><input type="checkbox" name="" class="selectStudent" data-student-user-school-id={{ student.user.school_id }} data-is-old={{student.isOld}}></td>
+                                        {% endif %}
+                                        <td>{{ student.user.school_id }}</td>
+                                        <td>
+                                            {% if change_class_level %}
+                                                {% if student.isOld %}
+                                                <span class="badge badge-secondary">Old</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ student.user.first_name }}</td>
+                                        <td>{{ student.user.last_name }}</td>
+                                        <td>{{ student.user.other_names }}</td>
+                                        <td>{{ student.user.email }}</td>
+                                        <th>{{ student.user.phone_number }}</th>
+                                        <td>{{ student.address }}</td>
+                                        <td>{{ student.dob }}</td>
+                                        <td>{{ student.user.get_gender_display }}</td>
+                                        <td>{{ student.previous_class }}</td>
+                                        <!-- <td> <img src="{{ student.user.profile_pic }}" style="width: 100px;" /> </td> -->
+                                        <!-- <td>{{ student.class_level.class_level_name }}</td> -->
+                                        <!-- <td>{{ student.user.last_login }}</td> -->
+                                        <td>{{ student.user.date_joined }}</td>
+                                        {% if not change_class_level %}
+                                            <td>
+                                                <a href="{% url 'edit_student' user_school_id student.user.school_id %}" class="btn btn-success">Edit</a> 
+                                                <a href="#" data-href="{% url 'delete_student' user_school_id student.user.school_id %}" class="btn btn-danger preDeleteBtn" data-toggle="modal" data-target=".bd-example-modal-sm">Delete</a>
+                                                <a href="{% url 'view_fee_payments' user_school_id student.user.school_id %}" class="btn btn-secondary">Fee Payments</a>
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                
+                            </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                        </div>
+                    <!-- /.card -->
+
+                    <div id="preDeleteModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-sm">
+                          <div class="modal-content">
+                            <div id="preDeleteModalContent" class="mb-3 mt-1 text-center">
+                            </div>
+                            <div class="d-flex justify-content-center mb-3">
+                              <button type="button" id="cancelBtn" class="btn btn-secondary btn-sm btn-success mr-3" data-dismiss="modal" >cancel</button>
+                              <a type="button" id="deleteBtn" class="btn btn-sm btn-danger">delete</a>
+                            </div>
+                        </div>    
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="preMoveModal" class="modal fade bd-move-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                  <div class="modal-content">
+                    <div id="preMoveModalContent" class="mb-3 mt-1 mr-1 ml-1 text-center">
+                    </div>
+                    <div class="d-flex justify-content-center mb-3">
+                      <button type="button" id="cancelBtn" class="btn btn-secondary btn-sm btn-success mr-3" data-dismiss="modal">cancel</button>
+                      <a type="button" id="moveBtn" class="btn text-light btn-sm btn-primary" >move</a>
+                    </div>
+                </div>    
+            </div>
+        </div><!-- /.container-fluid -->
+      </section>
+
+  {% endblock main_content %}
+
+{% block custom_js %}
+
+    <script>
+
+            $(document).on('click', '.preDeleteBtn', e => {
+
+                const href = e.target.dataset.href
+                // set modal message
+                const modalMsgEl = document.getElementById('preDeleteModalContent')
+                modalMsgEl.innerText = `Are you sure you want to delete?`
+                // set href attribute of delete button
+                const deleteBtnEl = document.getElementById('deleteBtn')
+                deleteBtnEl.setAttribute('href', href)
+                $("#preDeleteModal").modal('show')
+        
+            } )
+        
+            $(document).on('click', '#deleteBtn', e => {
+                $("#preDeleteModal").modal('hide')
+            })
+
+            $(document).on('click', '.dropdownOption', e => {
+                const selectedStudentsEl = document.getElementsByClassName('selectStudent')
+                let atLeastOneSelected = false
+                for (let _=0; _<Object.keys(selectedStudentsEl).length; _++) {
+                            if (selectedStudentsEl[_].checked) {
+                                atLeastOneSelected = true
+                            }
+                }
+                
+                if (atLeastOneSelected) {
+                    const moveBtnEl = document.getElementById('moveBtn')
+                    moveBtnEl.dataset.classId = e.target.dataset.classId
+                    const modalMsgEl = document.getElementById('preMoveModalContent')
+                    modalMsgEl.innerText = `Are you sure you want to move student(s) to ${e.target.innerText}?`
+                    $('#preMoveModal').modal('show')
+                } else {
+                    $('#error-message').show()
+
+                }
+            })
+
+            $(document).on('click', '#moveBtn', e => {
+                const classId = e.target.dataset.classId
+                const selectedStudentsEl = document.getElementsByClassName('selectStudent')
+                const studentArray = []
+                for (let _=0; _<Object.keys(selectedStudentsEl).length; _++) {
+                    if (selectedStudentsEl[_].checked) {
+                        studentArray.push(selectedStudentsEl[_].dataset.studentUserSchoolId)
+                    }
+                }
+
+                move_students(JSON.stringify({class_id: classId, students: studentArray}))
+            })
+
+            // csrf token setup
+            $(function () {
+                // This function gets cookie with a given name
+                function getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie != "") {
+                        let cookies = document.cookie.split(";");
+                        for (let i = 0; i < cookies.length; i++) {
+                            let cookie = jQuery.trim(cookies[i]);
+                            // Does this cookie string begin with the name we want?
+                            if (cookie.substring(0, name.length + 1) == name + "=") {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+
+                let csrftoken = getCookie("csrftoken");
+
+                /*
+                The functions below will create a header with csrftoken
+                */
+
+                function csrfSafeMethod(method) {
+                    // these HTTP methods do not require CSRF protection
+                    return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
+                }
+
+                function sameOrigin(url) {
+                    // test that a given url is a same-origin URL
+                    // url could be relative or scheme relative or absolute
+                    let host = document.location.host; // host + port
+                    let protocol = document.location.protocol;
+                    let sr_origin = "//" + host;
+                    let origin = protocol + sr_origin;
+                    // Allow absolute or scheme relative URLs to same origin
+                    return (
+                        url == origin ||
+                        url.slice(0, origin.length + 1) == origin + "/" ||
+                        url == sr_origin ||
+                        url.slice(0, sr_origin.length + 1) == sr_origin + "/" ||
+                        // or any other URL that isn't scheme relative or absolute i.e relative.
+                        !/^(\/\/|http:|https:).*/.test(url)
+                    );
+                }
+
+                $.ajaxSetup({
+                    beforeSend: function (xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+                        // Send the token to same-origin, relative URLs only.
+                        // Send the token only if the method warrants CSRF protection
+                        // Using the CSRFToken value acquired earlier
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                    },
+                });
+                
+            });
+
+            function move_students(data) {
+                $.ajax({
+                    url: "{% url 'change_students_class_save' user_school_id %}", // the endpoint
+                    type: "POST", // http method
+                    data: {  'data': data }, // data sent with the post request
+
+
+                    // handle a successful response
+                    success: function (res) {
+                        window.location.replace(JSON.parse(res).redirectUrl)
+                    },
+
+                    // handle a non-successful response
+                    error: function (xhr, res, err) {
+                        window.location.replace(res.redirectUrl)
+                    },
+                });
+            }
+
+            $(document).on('click', '.studentSelect', e => {
+                const selectedStudentsEl = document.getElementsByClassName('selectStudent')
+                switch(e.target.dataset.selectedOption) {
+
+                    case 'allStudents':
+                        for (let _=0; _<Object.keys(selectedStudentsEl).length; _++) {
+                            selectedStudentsEl[_].checked = true
+                        }
+                        return null
+
+                    case 'oldStudents':
+                        for (let _=0; _<Object.keys(selectedStudentsEl).length; _++) {
+                            if (selectedStudentsEl[_].dataset.isOld === "True") {
+                                selectedStudentsEl[_].checked = true
+                            }
+                        }
+                        return null
+
+                    case 'newStudents':
+                        for (let _=0; _<Object.keys(selectedStudentsEl).length; _++) {
+                            if (selectedStudentsEl[_].dataset.isOld === "False") {
+                                selectedStudentsEl[_].checked = true
+                            }
+                        }
+                        return null
+                        
+                    case 'deselectAllStudents':
+                        for (let _=0; _<Object.keys(selectedStudentsEl).length; _++) {
+                            selectedStudentsEl[_].checked = false
+                        }
+                        return null
+                        
+                    default:
+                        return null
+                }
+            })
+        </script>
+
+{% endblock custom_js %}
